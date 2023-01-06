@@ -1,56 +1,88 @@
 #!/usr/bin/python3
 """
-Moule 100-matrix_mul
-Contain method that does matrix multiplication
-Requires the same size lits/rows of matrix
+Module composed by a function that multiplies 2 matrices
 """
 
 
 def matrix_mul(m_a, m_b):
-    """Returns multiplication of matrix"""
-    message1 = "m_a should contain only integers or floats"
-    message2 = "m_b should contain only integers or floats"
+    """ Function that multiplies 2 matrices
+    Args:
+        m_a: matrix a
+        m_b: matrix b
+    Returns:
+        result of the multiplication
+    Raises:
+        TypeError: if m_a or m_b aren't a list
+        TypeError: if m_a or m_b aren't a list of a lists
+        ValueError: if m_a or m_b are empty
+        TypeError: if the lists of m_a or m_b don't have integers or floats
+        TypeError: if the rows of m_a or m_b don't have the same size
+        ValueError: if m_a and m_b can't be multiplied
+    """
 
-    if type(m_a) is not list:
+    if not isinstance(m_a, list):
         raise TypeError("m_a must be a list")
-    if len(m_a) == 0:
-        raise ValueError("m_a can't be empty")
-    samelen = len(m_a[0])
-    for la_inner in m_a:
-        if type(la_inner) is not list:
-            raise TypeError("m_a must be a list of lists")
-        if len(la_inner) == 0:
-            raise ValueError("m_a can't be empty")
-        if len(la_inner) != samelen:
-            raise TypeError("each row of m_a must be of the same size")
-        for element in la_inner:
-            if type(element) is not int and type(element) is not float:
-                raise TypeError(message1)
-    if type(m_b) is not list:
+
+    if not isinstance(m_b, list):
         raise TypeError("m_b must be a list")
-    if len(m_b) == 0:
-        raise ValueError("m_b can't be empty")
-    samelen = len(m_b[0])
-    for lb_inner in m_b:
-        if type(lb_inner) is not list:
+
+    for elems in m_a:
+        if not isinstance(elems, list):
+            raise TypeError("m_a must be a list of lists")
+
+    for elems in m_b:
+        if not isinstance(elems, list):
             raise TypeError("m_b must be a list of lists")
-        if len(lb_inner) == 0:
-            raise ValueError("m_b can't be empty")
-        if len(lb_inner) != samelen:
+
+    if len(m_a) == 0 or (len(m_a) == 1 and len(m_a[0]) == 0):
+        raise ValueError("m_a can't be empty")
+
+    if len(m_b) == 0 or (len(m_b) == 1 and len(m_b[0]) == 0):
+        raise ValueError("m_b can't be empty")
+
+    for lists in m_a:
+        for elems in lists:
+            if not type(elems) in (int, float):
+                raise TypeError("m_a should contain only integers or floats")
+
+    for lists in m_b:
+        for elems in lists:
+            if not type(elems) in (int, float):
+                raise TypeError("m_b should contain only integers or floats")
+
+    length = 0
+
+    for elems in m_a:
+        if length != 0 and length != len(elems):
+            raise TypeError("each row of m_a must be of the same size")
+        length = len(elems)
+
+    length = 0
+
+    for elems in m_b:
+        if length != 0 and length != len(elems):
             raise TypeError("each row of m_b must be of the same size")
-        for element in lb_inner:
-            if type(element) is not int and type(element) is not float:
-                raise TypeError(message2)
+        length = len(elems)
+
     if len(m_a[0]) != len(m_b):
         raise ValueError("m_a and m_b can't be multiplied")
 
-    outer_list = []
-    for l_row in range(len(m_a)):
-        inner_list = []
-        for k in range(len(m_b[0])):
-            sum = 0
-            for l_col in range(len(m_b[0])):
-                sum += m_a[l_row][l_col] * m_b[l_col][k]
-            inner_list.append(sum)
-        outer_list.append(inner_list)
-    return outer_list
+    r1 = []
+    i1 = 0
+
+    for a in m_a:
+        r2 = []
+        i2 = 0
+        num = 0
+        while (i2 < len(m_b[0])):
+            num += a[i1] * m_b[i1][i2]
+            if i1 == len(m_b) - 1:
+                i1 = 0
+                i2 += 1
+                r2.append(num)
+                num = 0
+            else:
+                i1 += 1
+        r1.append(r2)
+
+    return r1
