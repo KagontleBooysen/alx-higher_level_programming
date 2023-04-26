@@ -1,61 +1,41 @@
 #!/usr/bin/node
-
+const myArgs = process.argv.slice(2);
+const reqURL = 'https://swapi-api.hbtn.io/api/films/' + myArgs[0];
 const request = require('request');
-
-function getDataFrom (url) {
-  return new Promise(function (resolve, reject) {
-    request(url, function (err, _res, body) {
-      if (err) {
-        reject(err);
+const charactersDict = {};
+let id = '';
+function firstRequest () {
+  return new Promise((resolve, reject) => {
+    request(reqURL, function (error, response, body) {
+      if (error) {
+        console.log(error);
+        reject(error);
       } else {
-        resolve(body);
+        const characters = JSON.parse(body).characters;
+        for (const i of characters) {
+          charactersDict[i.slice(37, -1)] = i;
+          request(i, function (error, response, body) {
+            if (error) {
+              console.log(error);
+            } else {
+              id = JSON.parse(body).url.slice(37, -1);
+              charactersDict[id] = JSON.parse(body).name;
+            }
+            if (i === characters[characters.length - 1]) {
+              resolve(charactersDict);
+            }
+          });
+        }
       }
     });
   });
 }
 
-function errHandler (err) {
-  console.log(err);
+async function asyncCall () {
+  const result = await firstRequest();
+  for (const i in result) {
+    console.log(result[i]);
+  }
 }
 
-function printMovieCharacters (movieId) {
-  const movieUri = `https://swapi-api.hbtn.io/api/films/${movieId}`;
-
-  getDataFrom(movieUri)
-    .then(JSON.parse, errHandler)
-    .then(function (res) {
-      const characters = res.characters;
-      const promises = [];
-
-      for (let i = 0; i < characters.length; ++i) {
-        promises.push(getDataFrom(characters[i]));
-      }
-
-      Promise.all(promises)
-        .then((results) => {
-          for (let i = 0; i < results.length; ++i) {
-            console.log(JSON.parse(results[i]).name);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    });
-}
-
-printMovieCharacters(process.argv[2]);
-Footer
-© 2023 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-
+asyncCall();

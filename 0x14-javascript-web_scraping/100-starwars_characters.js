@@ -17,4 +17,4 @@ request(reqURL, function (error, response, body) {
       });
     }
   }
-});;
+});
